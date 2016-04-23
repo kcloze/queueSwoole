@@ -10,6 +10,9 @@
 * 排队公平性
 * 稳定性
 
+##设计文档
+* [架构图](https://github.com/kcloze/queueSwoole/blob/master/project.md)
+
 ##压测
 
 
