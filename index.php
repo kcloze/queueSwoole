@@ -8,4 +8,5 @@ define('ROOT_PATH', realpath(dirname(__FILE__)) . DS);
 require 'vendor/autoload.php';
 
 use Ycf\Core\YcfCore;
+
 YcfCore::run();
