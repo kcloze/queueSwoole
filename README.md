@@ -13,6 +13,13 @@
 ##设计文档
 * [架构图](https://github.com/kcloze/queueSwoole/blob/master/project.md)
 
+
+##启动
+```
+php server.php
+
+```
+
 ##压测
 
 
