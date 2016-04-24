@@ -9,4 +9,4 @@ require 'vendor/autoload.php';
 
 use Ycf\Core\YcfCore;
 
-YcfCore::run();
+YcfCore::run(); 
