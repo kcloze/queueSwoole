@@ -29,7 +29,9 @@ class CtrHello {
 	}
 
 	public function actionLog() {
-		YcfCore::$_log->log('hello ycf', 'info');
+		for ($i = 0; $i < 1000; $i++) {
+			YcfCore::$_log->log('hello ycf' . time(), 'info');
+		}
 	}
 
 }

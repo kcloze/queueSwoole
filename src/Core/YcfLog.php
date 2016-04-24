@@ -8,7 +8,7 @@ class YcfLog {
 	const LEVEL_INFO = 'info';
 	const LEVEL_PROFILE = 'profile';
 	const MAX_LOGS = 10000;
-
+	//单个类型log
 	private $_logs = array();
 	private $_logCount = 0;
 	private $_logPath = '';
@@ -26,15 +26,14 @@ class YcfLog {
 	}
 
 	public function processLogs() {
-		$text = array();
+		$logsAll["application"] = "[" . $_SERVER['REQUEST_URI'] . "] " . "[runing time]: " . (microtime(true) - YCF_BEGIN_TIME) . "\n";
 		foreach ((array) $this->_logs as $key => $logs) {
-			$text[$key] = '';
+			$logsAll[$key] = '';
 			foreach ((array) $logs as $log) {
-				$text[$key] .= $this->formatLogMessage($log[0], $log[1], $log[2], $log[3]);
+				$logsAll[$key] .= $this->formatLogMessage($log[0], $log[1], $log[2], $log[3]);
 			}
 		}
-
-		return $text;
+		return $logsAll;
 	}
 	/**
 	 *
@@ -45,20 +44,37 @@ class YcfLog {
 		if ($this->_logCount <= 0) {
 			return false;
 		}
-		$this->write();
+		$logsAll = $this->processLogs();
+		$this->write($logsAll);
 		$this->_logs = array();
 		$this->_logCount = 0;
+	}
+	//异步任务写日志
+	public function sendTask() {
+		$logsAll = $this->processLogs();
+		if (empty($logsAll)) {
+			return false;
+		}
+		$param = array(
+			'action' => 'flushLog',
+			'name' => '日志处理',
+			'content' => $logsAll,
+		);
+		$taskId = YcfCore::$_http_server->task(json_encode($param));
+
 	}
 	/**
 	 * [write 根据日志类型写到不同的日志文件]
 	 * @return [type] [description]
 	 */
-	public function write() {
-		$this->_logPath = ROOT_PATH . 'src/runtime/';
-		$text = $this->processLogs();
-		$text["application"] .= "[" . $_SERVER['REQUEST_URI'] . "] " . "[runing time]: " . (microtime(true) - YCF_BEGIN_TIME) . "\n";
+	public function write($logsAll) {
+		if (empty($logsAll)) {
+			return;
+		}
 
-		foreach ($text as $key => $value) {
+		$this->_logPath = ROOT_PATH . 'src/runtime/';
+
+		foreach ($logsAll as $key => $value) {
 			if (empty($key)) {
 				continue;
 			}
@@ -69,4 +85,5 @@ class YcfLog {
 		}
 
 	}
+
 }

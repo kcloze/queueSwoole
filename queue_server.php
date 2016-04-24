@@ -17,9 +17,9 @@ class HttpServer {
 		$this->http->set(
 			array(
 				'worker_num' => 1,
-				'daemonize' => true,
+				'daemonize' => false,
 				'max_request' => 1,
-				//'task_worker_num' => 4,
+				'task_worker_num' => 1,
 				//'dispatch_mode' => 1,
 			)
 		);

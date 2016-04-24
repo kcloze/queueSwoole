@@ -4,6 +4,17 @@ use Ycf\Core\YcfCore;
 use Ycf\Model\ModelPdo;
 
 class ModelTask {
+	//task 执行入口
+	public static function run($serv, $task_id, $from_id, $data) {
+		$data = json_decode($data, true);
+		$action = isset($data['action']) ? $data['action'] . 'Task' : 'notfind';
+		if (method_exists('Ycf\Model\ModelTask', $action)) {
+			return self::$action($serv, $task_id, $from_id, $data);
+		} else {
+			echo $action . ' method not find';
+		}
+
+	}
 
 	public static function testTask($serv, $task_id, $from_id, $data) {
 
@@ -22,17 +33,11 @@ class ModelTask {
 	}
 
 	public static function flushLogTask($serv, $task_id, $from_id, $data) {
-		YcfCore::$_log && YcfCore::$_log->flush();
-	}
-
-	public static function run($serv, $task_id, $from_id, $data) {
-		$data = json_decode($data, true);
-		$action = isset($data['action']) ? $data['action'] . 'Task' : 'notfind';
-		if (method_exists('Ycf\Model\ModelTask', $action)) {
-			return self::$action($serv, $task_id, $from_id, $data);
-		} else {
-			echo $action . ' method not find';
+		if (isset($data['content'])) {
+			YcfCore::$_log && YcfCore::$_log->write($data['content']);
 		}
+		echo "Task {$task_id} have done";
 
 	}
+
 }

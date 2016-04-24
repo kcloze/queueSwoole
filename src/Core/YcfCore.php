@@ -13,6 +13,7 @@ class YcfCore {
 	static function init() {
 		self::$_settings = parse_ini_file("settings.ini.php", true);
 		self::$_log = new YcfLog();
+		var_dump("lxp: " . time());
 		register_shutdown_function(array('Ycf\Core\YcfCore', 'handleFatal'));
 
 	}
@@ -36,19 +37,18 @@ class YcfCore {
 		} else {
 			echo ("action not find");
 		}
-		//self::$_log && self::$_log->flush();
+		self::$_log && self::$_log->sendTask();
 
 	}
 
 	/**
 	 * Fatal Error的捕获
 	 *
-	 * @codeCoverageIgnore
 	 */
 	static public function handleFatal() {
+		var_dump("kcloze");
 		$error = error_get_last();
 		if (!isset($error['type'])) {
-			self::shutdown();
 			return;
 		}
 
@@ -60,7 +60,7 @@ class YcfCore {
 		case E_COMPILE_ERROR:
 			break;
 		default:
-			self::shutdown();return;
+			return;
 		}
 		$message = $error['message'];
 		$file = $error['file'];
@@ -88,7 +88,6 @@ class YcfCore {
 			$log .= '[QUERY] ' . $_SERVER['REQUEST_URI'];
 		}
 		self::$_log->log($log, 'fatal');
-		self::shutdown();
 		if (self::$_http_server->response) {
 			self::$_http_server->response->status(500);
 			self::$_http_server->response->end('程序异常');
@@ -98,7 +97,7 @@ class YcfCore {
 	}
 	static public function shutdown() {
 		echo 'shutdown....';
-		self::$_log->flush();
+		self::$_log->sendTask();
 	}
 
 	static public function route() {
@@ -127,7 +126,7 @@ class YcfCore {
 	 *cli use this:  /opt/php7/bin/php index.php ycf=Pdo act=test
 	 *
 	 */
-	static function routeCli() {
+	static public function routeCli() {
 		$array = array('controller' => 'Hello', 'action' => 'index');
 		global $argv;
 		foreach ($argv as $arg) {
