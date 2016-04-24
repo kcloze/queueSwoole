@@ -1,8 +1,8 @@
 <?php
-namespace Ycf\Service;
+namespace Ycf\Controller;
 use Ycf\Model\ModelRedis;
 
-class YcfRedis {
+class CtrRedis {
 	public function actionTest() {
 		$modelTest = new ModelRedis();
 

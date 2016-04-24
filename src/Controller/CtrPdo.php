@@ -1,9 +1,9 @@
 <?php
-namespace Ycf\Service;
+namespace Ycf\Controller;
 use Ycf\Model\AyncDb;
 use Ycf\Model\ModelPdo;
 
-class YcfPdo {
+class CtrPdo {
 
 	public function actionTest() {
 		$modelTest = new ModelPdo();

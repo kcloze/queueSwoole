@@ -1,12 +1,7 @@
 <?php
 namespace Ycf\Model;
-use Ycf\Core\YcfCore;
 
-class ModelPdo {
-	private $_db = null;
-	function __construct() {
-		$this->_db = YcfCore::load('_db');
-	}
+class ModelPdo extends ModelBase {
 
 	public function testInsert() {
 		$data['pName'] = 'fww';

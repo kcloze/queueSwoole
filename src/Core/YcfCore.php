@@ -2,53 +2,19 @@
 
 namespace Ycf\Core;
 
-use Ycf\Core\YcfDB;
 use Ycf\Core\YcfLog;
-use Ycf\Core\YcfRedis;
 
 class YcfCore {
 
 	static $_settings = array();
-	static $_db = null;
-	static $_redis = null;
 	static $_log = null;
 	static $_http_server = null;
 
 	static function init() {
 		self::$_settings = parse_ini_file("settings.ini.php", true);
 		self::$_log = new YcfLog();
-		register_shutdown_function(array('Ycf\Core\YcfCore', 'shutdown'));
+		register_shutdown_function(array('Ycf\Core\YcfCore', 'handleFatal'));
 
-	}
-
-	static function load($_lib) {
-		switch ($_lib) {
-		case '_db':
-			return self::getDbInstance();
-			break;
-		case '_redis':
-			return self::getRedisInstance();
-			break;
-		default:
-			break;
-		}
-	}
-
-	static public function getDbInstance() {
-		// Create Mysql Client instance with you configuration settings
-		if (self::$_db == null) {
-			self::$_db = new YcfDB(self::$_settings['Mysql']);
-		}
-		return self::$_db;
-	}
-	static public function getRedisInstance() {
-		if (!extension_loaded('redis')) {
-			throw new \RuntimeException('php redis extension not found');
-			return null;
-		}
-		// Create Redis Client instance with you configuration settings
-		self::$_redis = new YcfRedis(self::$_settings['Redis']);
-		return self::$_redis;
 	}
 
 	static public function run() {
@@ -60,9 +26,9 @@ class YcfCore {
 		} else {
 			$router = self::route();
 		}
-		//route to service
+		//route to controller
 		$actionName = 'action' . ucfirst($router['action']);
-		$ycfName = "Ycf\Service\Ycf" . ucfirst($router['service']);
+		$ycfName = "Ycf\Controller\Ctr" . ucfirst($router['controller']);
 		if (method_exists($ycfName, $actionName)) {
 			self::init();
 			$ycf = new $ycfName();
@@ -70,19 +36,75 @@ class YcfCore {
 		} else {
 			echo ("action not find");
 		}
-		self::$_log && self::$_log->flush();
+		//self::$_log && self::$_log->flush();
 
 	}
 
+	/**
+	 * Fatal Error的捕获
+	 *
+	 * @codeCoverageIgnore
+	 */
+	static public function handleFatal() {
+		$error = error_get_last();
+		if (!isset($error['type'])) {
+			self::shutdown();
+			return;
+		}
+
+		switch ($error['type']) {
+		case E_ERROR:
+		case E_PARSE:
+		case E_DEPRECATED:
+		case E_CORE_ERROR:
+		case E_COMPILE_ERROR:
+			break;
+		default:
+			self::shutdown();return;
+		}
+		$message = $error['message'];
+		$file = $error['file'];
+		$line = $error['line'];
+		$log = "\n异常提示：$message ($file:$line)\nStack trace:\n";
+		$trace = debug_backtrace(1);
+
+		foreach ($trace as $i => $t) {
+			if (!isset($t['file'])) {
+				$t['file'] = 'unknown';
+			}
+			if (!isset($t['line'])) {
+				$t['line'] = 0;
+			}
+			if (!isset($t['function'])) {
+				$t['function'] = 'unknown';
+			}
+			$log .= "#$i {$t['file']}({$t['line']}): ";
+			if (isset($t['object']) && is_object($t['object'])) {
+				$log .= get_class($t['object']) . '->';
+			}
+			$log .= "{$t['function']}()\n";
+		}
+		if (isset($_SERVER['REQUEST_URI'])) {
+			$log .= '[QUERY] ' . $_SERVER['REQUEST_URI'];
+		}
+		self::$_log->log($log, 'fatal');
+		self::shutdown();
+		if (self::$_http_server->response) {
+			self::$_http_server->response->status(500);
+			self::$_http_server->response->end('程序异常');
+		}
+
+		unset(self::$_http_server->response);
+	}
 	static public function shutdown() {
 		echo 'shutdown....';
 		self::$_log->flush();
 	}
 
-	static function route() {
-		$array = array('service' => 'Hello', 'action' => 'index');
+	static public function route() {
+		$array = array('controller' => 'Hello', 'action' => 'index');
 		if (!empty($_GET["ycf"])) {
-			$array['service'] = $_GET["ycf"];
+			$array['controller'] = $_GET["ycf"];
 		}
 		if (!empty($_GET["act"])) {
 			$array['action'] = $_GET["act"];
@@ -96,7 +118,7 @@ class YcfCore {
 		if (count($request) < 2) {
 			return $array;
 		}
-		$array['service'] = $request[0];
+		$array['controller'] = $request[0];
 		$array['action'] = $request[1];
 
 		return $array;
@@ -106,7 +128,7 @@ class YcfCore {
 	 *
 	 */
 	static function routeCli() {
-		$array = array('service' => 'Hello', 'action' => 'index');
+		$array = array('controller' => 'Hello', 'action' => 'index');
 		global $argv;
 		foreach ($argv as $arg) {
 			$e = explode("=", $arg);
@@ -117,7 +139,7 @@ class YcfCore {
 			}
 		}
 		if (!empty($_GET["ycf"])) {
-			$array['service'] = $_GET["ycf"];
+			$array['controller'] = $_GET["ycf"];
 		}
 		if (!empty($_GET["act"])) {
 			$array['action'] = $_GET["act"];

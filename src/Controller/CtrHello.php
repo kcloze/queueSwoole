@@ -1,8 +1,8 @@
 <?php
-namespace Ycf\Service;
+namespace Ycf\Controller;
 use Ycf\Core\YcfCore;
 
-class YcfHello {
+class CtrHello {
 
 	public function actionIndex() {
 		echo "hello ycf";

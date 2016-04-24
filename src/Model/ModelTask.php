@@ -1,5 +1,6 @@
 <?php
 namespace Ycf\Model;
+use Ycf\Core\YcfCore;
 use Ycf\Model\ModelPdo;
 
 class ModelTask {
@@ -18,6 +19,10 @@ class ModelTask {
 		//$fd = json_decode($data, true)['fd'];
 		//$serv->send($fd, "Data in Task {$task_id}");
 		echo "Task {$task_id}'s result {$result}";
+	}
+
+	public static function flushLogTask($serv, $task_id, $from_id, $data) {
+		YcfCore::$_log && YcfCore::$_log->flush();
 	}
 
 	public static function run($serv, $task_id, $from_id, $data) {
