@@ -16,7 +16,8 @@
 
 ##启动
 ```
-php server.php
+chmod u+x server.sh
+./server.sh start|stop
 
 ```
 
