@@ -60,7 +60,7 @@ class YcfLog {
 			'name' => '日志处理',
 			'content' => $logsAll,
 		);
-		$taskId = YcfCore::$_http_server->task(json_encode($param));
+		$taskId = $GLOBALS['http_server']->task(json_encode($param));
 
 	}
 	/**

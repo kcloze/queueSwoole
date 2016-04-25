@@ -4,23 +4,15 @@ namespace Ycf\Core;
 
 use Ycf\Core\YcfLog;
 
-//use Ycf\Core\YcfCore;
-
 class YcfCore {
 
 	static $_settings = array();
 	static $_log = null;
-	static $_http_server = null;
-	public $_response = null;
+	public $_http_server = null;
 
 	public function init() {
 		self::$_settings = parse_ini_file("settings.ini.php", true);
 		self::$_log = new YcfLog();
-		self::$_http_server = $GLOBALS['http_server'];
-		var_dump("lxp: " . time());
-
-		//register_shutdown_function(array('Ycf\Core\YcfCore', 'shutdown'));
-
 	}
 
 	public function run() {
@@ -44,7 +36,7 @@ class YcfCore {
 	}
 
 	public function shutdown() {
-		echo 'shutdown....';
+		//echo 'shutdown....';
 		self::$_log->sendTask();
 	}
 

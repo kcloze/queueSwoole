@@ -31,6 +31,12 @@ class HttpServer {
 		$this->http->on('WorkerStart', array($this, 'onWorkerStart'));
 
 		$this->http->on('request', function ($request, $response) {
+			//捕获异常
+			register_shutdown_function(array($this, 'handleFatal'));
+			//请求过滤
+			if ($request->server['path_info'] == '/favicon.ico' || $request->server['request_uri'] == '/favicon.ico') {
+				return $response->end();
+			}
 			$this->response = $response;
 			if (isset($request->server)) {
 				self::$server = $request->server;
@@ -104,7 +110,6 @@ class HttpServer {
 	 *
 	 */
 	public function handleFatal() {
-		var_dump("kcloze");
 		$error = error_get_last();
 		if (!isset($error['type'])) {
 			return;
@@ -147,19 +152,18 @@ class HttpServer {
 		}
 		YcfCore::$_log->log($log, 'fatal');
 		YcfCore::$_log->sendTask();
-		if ($this->_response) {
-			$this->_response->status(500);
-			$this->_response->end('程序异常');
+		if ($this->response) {
+			$this->response->status(500);
+			$this->response->end('程序异常');
 		}
 
-		unset($this->_response);
+		unset($this->response);
 	}
 
 	public static function getInstance() {
 		if (!self::$instance) {
 			self::$instance = new HttpServer();
 		}
-		//register_shutdown_function(array($this, 'handleFatal'));
 		return self::$instance;
 	}
 }

@@ -6,11 +6,11 @@ class CtrHello {
 
 	public function actionIndex() {
 		echo "hello ycf";
-		//echo $this->getPPP();
 
 	}
 	public function actionHello() {
 		echo "hello ycf" . time();
+		echo $this->getPPP();
 
 	}
 
