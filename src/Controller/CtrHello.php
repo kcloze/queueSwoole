@@ -6,6 +6,7 @@ class CtrHello {
 
 	public function actionIndex() {
 		echo "hello ycf";
+		//echo $this->getPPP();
 
 	}
 	public function actionHello() {
@@ -29,9 +30,9 @@ class CtrHello {
 	}
 
 	public function actionLog() {
-		for ($i = 0; $i < 1000; $i++) {
-			YcfCore::$_log->log('hello ycf' . time(), 'info');
-		}
+		//for ($i = 0; $i < 1000; $i++) {
+		YcfCore::$_log->log('hello ycf' . time(), 'info');
+		//}
 	}
 
 }

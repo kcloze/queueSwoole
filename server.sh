@@ -1,7 +1,7 @@
 #!/bin/sh
 pidFile="/var/qserver_pid";
 function start(){
-	php queue_server.php $pidFile
+	php ./src/Core/HttpServer.php $pidFile
   
 	if [ $? == 0 ]; then
 		printf "\qserver start OK\r\n"

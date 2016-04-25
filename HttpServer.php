@@ -1,5 +1,5 @@
 <?php
-//namespace Ycf\Swoole;
+//namespace Ycf\Core;
 //use Ycf\Core\YcfCore;
 
 class HttpServer {
@@ -10,6 +10,8 @@ class HttpServer {
 	public static $post;
 	public static $header;
 	public static $server;
+
+	public $response = null;
 
 	public function __construct() {
 		$this->http = new swoole_http_server("0.0.0.0", 9501);
@@ -27,7 +29,7 @@ class HttpServer {
 		$this->http->on('WorkerStart', array($this, 'onWorkerStart'));
 
 		$this->http->on('request', function ($request, $response) {
-
+			$this->response = $response;
 			if (isset($request->server)) {
 				HttpServer::$server = $request->server;
 				foreach ($request->server as $key => $value) {
@@ -52,13 +54,13 @@ class HttpServer {
 			if (isset($request->request_uri)) {
 				$_SERVER['REQUEST_URI'] = $request->request_uri;
 			}
-
-			$GLOBALS['_http_server'] = $this->http;
-
+			//$GLOBALS['http_server'] = $this->http;
 			ob_start();
 			//实例化ycf对象
 			try {
-				Ycf\Core\YcfCore::run();
+				$Ycf = new Ycf\Core\YcfCore;
+				$Ycf->init();
+				$Ycf->run();
 			} catch (Exception $e) {
 				var_dump($e);
 			}
@@ -86,7 +88,8 @@ class HttpServer {
 
 	}
 	public function onTask($serv, $task_id, $from_id, $data) {
-		Ycf\Core\YcfCore::init();
+		$Ycf = new Ycf\Core\YcfCore;
+		$Ycf->init();
 		return Ycf\Model\ModelTask::run($serv, $task_id, $from_id, $data);
 	}
 	public function onFinish($serv, $task_id, $data) {
@@ -94,11 +97,67 @@ class HttpServer {
 		echo "Result: {$data}\n";
 		unset($data);
 	}
+	/**
+	 * Fatal Error的捕获
+	 *
+	 */
+	public function handleFatal() {
+		var_dump("kcloze");
+		$error = error_get_last();
+		if (!isset($error['type'])) {
+			return;
+		}
+
+		switch ($error['type']) {
+		case E_ERROR:
+		case E_PARSE:
+		case E_DEPRECATED:
+		case E_CORE_ERROR:
+		case E_COMPILE_ERROR:
+			break;
+		default:
+			return;
+		}
+		$message = $error['message'];
+		$file = $error['file'];
+		$line = $error['line'];
+		$log = "\n异常提示：$message ($file:$line)\nStack trace:\n";
+		$trace = debug_backtrace(1);
+
+		foreach ($trace as $i => $t) {
+			if (!isset($t['file'])) {
+				$t['file'] = 'unknown';
+			}
+			if (!isset($t['line'])) {
+				$t['line'] = 0;
+			}
+			if (!isset($t['function'])) {
+				$t['function'] = 'unknown';
+			}
+			$log .= "#$i {$t['file']}({$t['line']}): ";
+			if (isset($t['object']) && is_object($t['object'])) {
+				$log .= get_class($t['object']) . '->';
+			}
+			$log .= "{$t['function']}()\n";
+		}
+		if (isset($_SERVER['REQUEST_URI'])) {
+			$log .= '[QUERY] ' . $_SERVER['REQUEST_URI'];
+		}
+		Ycf\Core\YcfCore::$_log->log($log, 'fatal');
+		Ycf\Core\YcfCore::$_log->sendTask();
+		if ($this->_response) {
+			$this->_response->status(500);
+			$this->_response->end('程序异常');
+		}
+
+		unset($this->_response);
+	}
 
 	public static function getInstance() {
 		if (!self::$instance) {
 			self::$instance = new HttpServer();
 		}
+		register_shutdown_function(array($this, 'handleFatal'));
 		return self::$instance;
 	}
 }
