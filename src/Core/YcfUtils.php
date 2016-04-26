@@ -22,7 +22,7 @@ class YcfUtils {
 	 * @param  [type] $msg [description]
 	 * @return [type]      [description]
 	 */
-	static function exit($msg) {
+	static function exitMsg($msg) {
 		if (!defined('SWOOLE')) {
 			exit($msg);
 		} else {

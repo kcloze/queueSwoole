@@ -79,9 +79,9 @@ class YcfLog {
 				continue;
 			}
 			$fileName = $this->_logPath . $key . '.log';
-			$fp2 = fopen($fileName, "a+") or YcfUtils::exit("Log fatal Error !");
-			fwrite($fp2, $value);
-			fclose($fp2);
+			$fp2 = @fopen($fileName, "a+") or YcfUtils::exitMsg("Log fatal Error !");
+			@fwrite($fp2, $value);
+			@fclose($fp2);
 		}
 
 	}
