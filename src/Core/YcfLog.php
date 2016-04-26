@@ -73,7 +73,9 @@ class YcfLog {
 		}
 
 		$this->_logPath = ROOT_PATH . 'src/runtime/';
-
+		if(!is_dir($this->_logPath)) {
+			self::mkdir($this->_logPath, array(), true);
+		}
 		foreach ($logsAll as $key => $value) {
 			if (empty($key)) {
 				continue;
@@ -84,6 +86,28 @@ class YcfLog {
 			@fclose($fp2);
 		}
 
+	}
+
+	/**
+	 * Shared environment safe version of mkdir. Supports recursive creation.
+	 * For avoidance of umask side-effects chmod is used.
+	 *
+	 * @param string $dst path to be created
+	 * @param array $options newDirMode element used, must contain access bitmask
+	 * @param boolean $recursive whether to create directory structure recursive if parent dirs do not exist
+	 * @return boolean result of mkdir
+	 * @see mkdir
+	 */
+	private static function mkdir($dst,array $options,$recursive)
+	{
+		$prevDir=dirname($dst);
+		if($recursive && !is_dir($dst) && !is_dir($prevDir))
+			self::mkdir(dirname($dst),$options,true);
+
+		$mode=isset($options['newDirMode']) ? $options['newDirMode'] : 0777;
+		$res=mkdir($dst, $mode);
+		@chmod($dst,$mode);
+		return $res;
 	}
 
 }
