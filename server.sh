@@ -1,5 +1,7 @@
-#!/bin/sh
-pidFile="/var/qserver_pid";
+#
+#!/bin/bash
+pidFile="/var/qserver_pid"
+
 function start(){
 	php ./src/Core/HttpServer.php $pidFile
   
