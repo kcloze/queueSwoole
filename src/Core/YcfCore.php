@@ -30,8 +30,13 @@ class YcfCore
         $actionName = 'action' . ucfirst($router['action']);
         $ycfName    = "Ycf\Controller\Ctr" . ucfirst($router['controller']);
         if (method_exists($ycfName, $actionName)) {
-            $ycf = new $ycfName();
-            $ycf->$actionName();
+            try {
+                $ycf = new $ycfName();
+                $ycf->$actionName();
+            } catch (Exception $e) {
+                var_dump($e);
+            }
+
         } else {
             echo ("action not find");
         }
