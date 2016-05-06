@@ -8,6 +8,6 @@ define('YCF_BEGIN_TIME', microtime(true));
 require 'vendor/autoload.php';
 
 use Ycf\Core\YcfCore;
-$Ycf = new YcfCore;
-$Ycf->init();
-$Ycf->run();
+$ycf = new YcfCore;
+$ycf->init();
+$ycf->run();

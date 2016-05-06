@@ -8,7 +8,7 @@ class CtrHello
 
     public function actionIndex()
     {
-        echo "hello ycf";
+        echo "hello ycf 456";
         //YcfCore::$_response->end("Greet, Klcoze!");
 
     }
@@ -28,7 +28,7 @@ class CtrHello
         );
         //var_dump(HttpServer::getInstance()->http);
         //$this->http->task(json_encode($param));
-        for ($i = 0; $i < 1000; $i++) {
+        for ($i = 0; $i < 1; $i++) {
             $taskId = YcfCore::$_http_server->task(json_encode($param));
         }
         echo $taskId . " hello ycf" . time();
@@ -39,6 +39,7 @@ class CtrHello
     {
         //for ($i = 0; $i < 1000; $i++) {
         YcfCore::$_log->log('hello ycf' . time(), 'info');
+        YcfCore::$_response->end("Greet, Klcoze!");
         //}
     }
 

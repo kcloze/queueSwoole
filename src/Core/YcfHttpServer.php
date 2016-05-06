@@ -1,11 +1,11 @@
 <?php
 namespace Ycf\Core;
 
-use Ycf\Core\HttpServer;
 use Ycf\Core\YcfCore;
+use Ycf\Core\YcfHttpServer;
 use Ycf\Model\ModelTask;
 
-class HttpServer
+class YcfHttpServer
 {
     public static $instance = null;
 
@@ -23,10 +23,10 @@ class HttpServer
 
         $this->http->set(
             array(
-                'worker_num'      => 1,
+                'worker_num'      => 2,
                 'daemonize'       => false,
                 'max_request'     => 1,
-                'task_worker_num' => 1,
+                'task_worker_num' => 2,
                 //'dispatch_mode' => 1,
             )
         );
@@ -37,7 +37,7 @@ class HttpServer
             //捕获异常
             register_shutdown_function(array($this, 'handleFatal'));
             //请求过滤
-            if ($request->server['path_info'] == '/favicon.ico' || $request->server['request_uri'] == '/favicon.ico') {
+            if ('/favicon.ico' == $request->server['path_info'] || '/favicon.ico' == $request->server['request_uri']) {
                 return $response->end();
             }
             if (isset($request->server)) {
@@ -68,10 +68,10 @@ class HttpServer
             ob_start();
             //实例化ycf对象
             try {
-                $Ycf                = new YcfCore;
+                $ycf                = new YcfCore;
                 YcfCore::$_response = $response;
-                $Ycf->init();
-                $Ycf->run();
+                $ycf->init($this->http);
+                $ycf->run();
             } catch (Exception $e) {
                 var_dump($e);
             }
@@ -101,8 +101,8 @@ class HttpServer
     }
     public function onTask($serv, $task_id, $from_id, $data)
     {
-        $Ycf = new YcfCore;
-        $Ycf->init();
+        $ycf = new YcfCore;
+        $ycf->init();
         return ModelTask::run($serv, $task_id, $from_id, $data);
     }
     public function onFinish($serv, $task_id, $data)
@@ -170,10 +170,10 @@ class HttpServer
     public static function getInstance()
     {
         if (!self::$instance) {
-            self::$instance = new HttpServer();
+            self::$instance = new YcfHttpServer();
         }
         return self::$instance;
     }
 }
 
-HttpServer::getInstance();
+YcfHttpServer::getInstance();

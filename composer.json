@@ -1,0 +1,19 @@
+{
+    "name": "kcloze/ycf",
+    "description": "A simple PHP framework for api or cli application",
+    "keywords": ["microframework","api","cli"],
+    "homepage": "https://www.kcloze.com",
+    "license": "MIT",
+    "require": {
+        "php": ">=5.3.0"
+    },
+    "require-dev": {
+        "php": ">=5.3.0"
+    },
+    "minimum-stability": "stable",
+    "autoload": {
+        "psr-4": {
+            "Ycf\\": "src"
+        }
+    }
+}

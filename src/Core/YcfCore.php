@@ -10,12 +10,15 @@ class YcfCore
     static $_settings    = array();
     static $_response    = null;
     static $_log         = null;
-    public $_http_server = null;
+    static $_http_server = null;
 
-    public function init()
+    public function init($httpServer = null)
     {
         self::$_settings = parse_ini_file("settings.ini.php", true);
         self::$_log      = new YcfLog();
+        if (!empty($httpServer)) {
+            self::$_http_server = $httpServer;
+        }
     }
 
     public function run()
@@ -65,7 +68,7 @@ class YcfCore
             return $array;
         }
         $uri = parse_url($_SERVER['REQUEST_URI']);
-        if (empty($uri['path']) or $uri['path'] == '/' or $uri['path'] == '/index.php') {
+        if (empty($uri['path']) or '/' == $uri['path'] or '/index.php' == $uri['path']) {
             return $array;
         }
         $request = explode('/', trim($uri['path'], '/'), 3);
